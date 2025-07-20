@@ -13,7 +13,6 @@ WellNest is a lightweight web application that allows users to express their tho
 - 🧼 Delete individual journal entries
 - 🧍 User authentication (Register/Login/Logout)
 - 🎨 Beautiful responsive UI with emoji mood icons
-- ☁️ Deployed using Render (or host locally)
 
 ---
 
