@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - WellNest</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      position: relative;
+      background: linear-gradient(to right, #8f4f2a, #7d471b);
+      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      background-color: rgba(99, 70, 70, 0.85);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(52, 25, 25, 0.15);
+      text-align: center;
+      color: #f9f9f9;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+
+    h2, h3 {
+  font-family: 'Quicksand', 'Poppins', sans-serif;
+  font-weight: 600;
+}
+    p {
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: #f0eaea;
+    }
+
+    textarea {
+      width: 90%;
+      height: 100px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      resize: none;
+      font-size: 16px;
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #333;
+    }
+
+    textarea:focus {
+      border-color: #4fc3f7;
+      outline: none;
+      box-shadow: 0 0 10px rgba(79, 195, 247, 0.4);
+    }
+
+    button {
+      background-color: #ffecb3;
+      color: #333;
+      border: none;
+      padding: 12px 25px;
+      font-size: 16px;
+      margin-top: 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #ffe082;
+      transform: scale(1.03);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 16px;
+    }
+
+    #history {
+      margin-top: 40px;
+      text-align: left;
+      padding: 20px;
+      background: rgba(72, 45, 45, 0.75);
+      border-radius: 10px;
+      max-height: 250px;
+      overflow-y: auto;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+    }
+
+    #history p {
+      font-size: 14px;
+      line-height: 1.5;
+      border-bottom: 1px solid #140101;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      color: #f0eaea;
+    }
+
+    .mood-icon {
+      font-size: 20px;
+      margin-right: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div style="
+  position: absolute;
+  top: 20px;
+  right: 30px;
+">
+  <form action="/logout" method="post">
+    <button type="submit" style="
+      background-color: transparent;
+      color: white;
+      border: 2px solid white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    ">Logout</button>
+  </form>
+</div>
+  <div class="container">
+    <h2>Welcome to WellNest ✨</h2>
+    <p>Type your thoughts and get your mood instantly!</p>
+
+    <form id="moodForm">
+      <textarea name="journal" id="textInput" placeholder="Type your feelings here..." required></textarea><br>
+      <button type="submit">Check Mood</button>
+    </form>
+
+    <div id="result"></div>
+    <h3>Your Past Records</h3>
+    <div id="history"></div>
+    <div style="margin: 10px 0;">
+  <button onclick="downloadCSV()">📁 Download CSV</button>
+  <button onclick="downloadPDF()">📝 Download PDF</button>
+
+</div>
+    <script>
+      function downloadCSV() {
+        fetch('/download/csv')
+          .then(response => response.blob())
+          .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'mood_history.csv';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          })
+          .catch(error => console.error('Error downloading CSV:', error));
+      }
+
+      function downloadPDF() {
+        fetch('/download/pdf')
+          .then(response => response.blob())
+          .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'mood_history.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          })
+          .catch(error => console.error('Error downloading PDF:', error));
+      }
+    </script>
+  </div>
+
+  <script>
+    const moodEmojis = {
+      happy: "😊",
+      sad: "😢",
+      angry: "😠",
+      anxious: "😰"
+    };
+
+    async function deleteEntry(entryId) {
+  if (!confirm("Are you sure you want to delete this entry?")) return;
+
+  const response = await fetch(`/delete/${entryId}`, {
+    method: 'POST'
+  });
+
+  const result = await response.json();
+  if (result.success) {
+    loadHistory(); // Refresh after delete
+  } else {
+    alert("Delete failed: " + (result.error || "Unknown error"));
+  }
+}
+
+    document.getElementById('moodForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const text = document.getElementById('textInput').value;
+
+      const response = await fetch('/predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text })
+      });
+
+      const data = await response.json();
+      const resultDiv = document.getElementById('result');
+
+      if (data.error) {
+        resultDiv.innerHTML = `<p style="color:red;">${data.error}</p>`;
+      } else {
+        const emoji = moodEmojis[data.mood] || "🙂";
+        resultDiv.innerHTML = `
+          <p><span class="mood-icon">${emoji}</span><strong>Mood:</strong> ${data.mood}</p>
+          <p><strong>Suggestion:</strong> ${data.suggestion}</p>
+        `;
+        loadHistory(); // Refresh history
+      }
+    });
+
+
+
+    async function loadHistory() {
+      const res = await fetch('/history');
+      const data = await res.json();
+      const container = document.getElementById('history');
+      container.innerHTML = '';
+
+      if (data.entries.length === 0) {
+        container.innerHTML = "<p>No past records found.</p>";
+        return;
+      }
+
+
+      data.entries.forEach(entry => {
+      const emoji = moodEmojis[entry.mood] || "🙂";
+      const div = document.createElement('div');
+      div.innerHTML = `
+    <p><strong>${entry.date}</strong> - <span class="mood-icon">${emoji}</span>${entry.mood}</p>
+    <p>${entry.text}</p>
+    <button onclick="deleteEntry(${entry.id})" style="margin-bottom: 10px;">🗑️ Delete</button>
+    <hr>`;
+  container.appendChild(div);
+});
+    }
+
+    window.onload = loadHistory;
+  </script>
+
+</body>
+</html>

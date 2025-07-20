@@ -1,0 +1,32 @@
+text,sentiment
+"I am very happy today",happy
+"I feel so sad and down",sad
+"This is amazing, such a great day!",happy
+"I’m stressed and anxious",anxious
+"I hate how things are going",angry
+"Everything is going wrong today",sad
+"I feel calm and peaceful",happy
+"I'm overwhelmed with anxiety",anxious
+"I can't stop worrying about things",anxious
+"My heart is racing and I feel scared",anxious
+"I'm angry at everything today",angry
+"I can't believe how unfair this is",angry
+"Why does this always happen to me?",sad
+"I'm feeling worthless and alone",sad
+"Today was a great day full of joy",happy
+"I'm feeling relaxed and content",calm
+"I had a fight with my friend",angry
+"I just want to cry and sleep",sad
+"Life feels so heavy right now",sad
+"I love how peaceful everything feels",calm
+"I’m so excited about tomorrow",happy
+"I feel light and carefree today",happy
+"My mind won’t stop racing",anxious
+"I feel like screaming out of frustration",angry
+"It’s quiet and I’m enjoying the stillness",calm
+"Everything feels calm and under control",calm
+"I'm having a panic attack",anxious
+"I’m furious about what happened",angry
+"I'm content and at peace right now",calm
+"I feel hopeless and down",sad
+"Nothing makes me feel good anymore",sad
